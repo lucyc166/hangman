@@ -1,0 +1,139 @@
+# Python 3 Hangman - feel free to edit or use for your own use!
+# if you would like to create changes, I am trying to figure out how to print the Hangman at each round regardless of a correct or wrong guess.
+# it wouldn't work for me, so it would be great if you could help me fix that issue!
+
+# importing packages
+from nltk.corpus import words
+import random
+import string
+import sys
+
+# creating a word list from the words in the nltk words package
+# picking a random word from that list
+# creating a letter list of the letters in the random word
+word_list = words.words()
+random_word = random.choice(word_list)
+letter_list = list(random_word)
+
+# creating empty strings, lists, and integers with no value
+incorrect_words_guessed = ""
+whole_body = ""
+spaces_list = list()
+num_of_spaces = 0
+num_of_incorrect_guesses = 0
+
+# creating a list of acceptable user input characters
+# later, the program will only accept uppercase and lowercase letters and nothing else
+alphabet = list(string.ascii_lowercase)
+
+print(random_word)
+# making the hangman body
+# \n creates a new line, so the code below forms a human:
+#  O
+# \|/
+#  |
+# / \
+# adding the strings together forms a human 
+head = "  O\n "
+left_arm = "\\"
+body = "|"
+right_arm = "/"
+butt = "\n  |"
+left_leg = "\n /"
+right_leg = " \\"
+whole_body = head + left_arm + body + right_arm + butt + left_leg + right_leg
+
+# creating a new function that removes a "body part" depending on how many incorrect guesses there were
+# ex. one wrong guess removes the left arm, two wrong guesses removes the left and right arms
+# there are some extra spaces and \n's because removing a "body part" sometimes changes the shape of the person
+def remove_body_part():
+  whole_body = head + left_arm + body + right_arm + butt + left_leg + right_leg
+  if num_of_incorrect_guesses == 1:
+    whole_body = head + " " + body + right_arm + butt + left_leg + right_leg
+    print("You lost an arm!")
+  elif num_of_incorrect_guesses == 2:
+    whole_body = head + " " + body + butt + left_leg + right_leg
+    print("You lost another arm!")
+  elif num_of_incorrect_guesses == 3:
+    whole_body = head + " " + body + butt + "\n  " + right_leg
+    print("You lost your left leg...")
+  elif num_of_incorrect_guesses == 4:
+    whole_body = head + " " + body + butt 
+    print("Great. Your right leg is gone too!")
+  elif num_of_incorrect_guesses == 5:
+    whole_body = head + " " + body 
+    print("You're not doing so well...you just lost your butt.")
+  elif num_of_incorrect_guesses == 6:
+    whole_body = head
+    print("Nice work. You just lost your body.")
+  print(whole_body)
+
+# this is the beginning of what the actual user will see
+# instructions on the game are provided
+# the person is shown
+print("Welcome to Hangman! Guess a letter at a time to try to guess the word!")
+print("For every wrong guess, your person will lose a part of their body.")
+print("Try to guess the right word before the person disappears!")
+print(whole_body)
+
+# making the blank spaces depending on how many letters are in the word
+# making the list look like a string (so it looks like _ _ instead of ["_", "_"])
+for i in random_word:
+  spaces_list.append("_ ")
+  num_of_spaces += 1
+print("".join(spaces_list))
+print("Your word has " + str(num_of_spaces) + " letters. Try to guess a letter!")
+
+# as long as there are 6 or less incorrect guesses, the user can keep guessing. Otherwise, the program will stop.
+# however, if the user guesses everything, then they win and the program stops.
+# the program changes all user inputs to lowercase so the input is not case sensitive
+# there are 3 cases here:
+while num_of_incorrect_guesses <= 6:
+  guess = input()
+  lowercase_guess = guess.lower()
+
+  # case 1: the user guesses correctly: 
+  if guess in letter_list:
+    print("Nice guess! That's right. Keep guessing! \n")
+    print("\n" + str(num_of_incorrect_guesses) + " incorrect guesses: " + incorrect_words_guessed)
+
+    # the program will replace the spaces (_) with the letter guessed
+    # essentially, it identifies the index(es) of the letter guessed in the random word chosen
+    # then it goes to the blank spaces and finds the spaces who's index(es) match the ones identified, and replaces them with the guessed letter
+    for i in range(0,len(random_word)):
+      if random_word.startswith(guess, i):
+        spaces_list[i] = guess.upper()
+
+    # if the word is guessed, that means there are no more spaces
+    # the user wins and the program exits the loop
+    if "_ " not in spaces_list:
+      print("You're done! Congratulations...you win Hangman!")
+      break    
+
+  # case 2: the user doesn't guess a letter
+  # this is where the alphabet from before comes into play; the program will ask them to try again
+  elif lowercase_guess not in alphabet:
+    print("Try again. That's not a letter.")
+  
+  # case 3: the user guesses incorrectly
+  else:
+    # changes the guess to uppercase and adds it to a group of incorrect guesses
+    # adds 1 to the number of wrong guesses
+    # calls the functions from above to take away a body part
+    incorrect_words_guessed += guess.upper()
+    num_of_incorrect_guesses += 1
+    remove_body_part()
+    print("\n" + str(num_of_incorrect_guesses) + " incorrect guesses: " + incorrect_words_guessed)
+
+  print("".join(spaces_list))
+
+# if the user wins, the program will not print "You lose".
+# regardless of win or loss, the program will list the total incorrect guesses and the random word chosen.
+if num_of_incorrect_guesses == 7:
+  print("You lose. Play again?")
+print("Total incorrect guesses: " + str(num_of_incorrect_guesses))
+print("The word was " + random_word + ".")
+
+
+
+
